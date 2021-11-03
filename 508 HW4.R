@@ -77,6 +77,7 @@ housing %>%
        subtitle = "Two category features (Yes and No)")+
   theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
 
+
 #Engineer new features
 housing.eng<-housing%>%
   mutate(
@@ -115,7 +116,20 @@ housing.eng<-housing%>%
       month == "mar"| month == "apr"| month == "may" ~ "Spring",
       month == "jun" | month == "jul" | month == "aug"~ "Summer",
       month == "sep"| month == "oct" | month == "nov" ~ "Fall",
-      month == "dec" ~ "Winter")
+      month == "dec" ~ "Winter"),
+    education.cat = case_when(
+      education == "basic.4y" | education == "basic.6y" | education == "basic.9y" ~ "Basic",
+      education == "high.school" ~ "HighSchool",
+      education == "professional.course" ~ "Professional",
+      education == "university.degree" ~ "University",
+      education == "illiterate" ~ "Illiterate",
+      education == "unknown" ~ "Unknown"),
+    job.cat = ifelse(job == "self-employed"|job =="unemloyed", "Self_or_unemployed", 
+                     "Other"),
+    campaign.cat = case_when(
+      campaign >= 0 & campaign < 2  ~ "Once",
+      campaign >= 2 & campaign < 10  ~ "2 to 9 times",
+      campaign > 9                    ~ "More than 9 times")
   )
 
 #Interpret your new features
@@ -166,17 +180,17 @@ kitchenTest<-housingTest%>%
 engTrain<-housingTrain%>%
   dplyr::select(
     y,y_numeric,age.cat, previous.cat, price.cat, conf.cat, inflation.cat, 
-    job, marital, education,taxLien,
+    job.cat, marital, education.cat,taxLien,
     mortgage, taxbill_in_phl, contact, 
-    day_of_week, campaign, pdays, season, poutcome
+    day_of_week, campaign, pdays, season, poutcome,campaign.cat
   )
 
 engTest<-housingTest%>%
   dplyr::select(
     y,y_numeric,age.cat, previous.cat, price.cat, conf.cat, inflation.cat, 
-    job, marital, education,taxLien,
+    job.cat, marital, education.cat,taxLien,
     mortgage, taxbill_in_phl, contact, 
-    day_of_week, campaign, pdays, season, poutcome
+    day_of_week, campaign, pdays, season, poutcome,campaign.cat
   )
 
 #kitchen sink regression
