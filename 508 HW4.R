@@ -12,7 +12,11 @@ palette5 <- c("#981FAC","#CB0F8B","#FF006A","#FE4C35","#FE9900")
 palette4 <- c("#981FAC","#FF006A","#FE4C35","#FE9900")
 palette2 <- c("#981FAC","#FF006A")
 
-housing<-read.csv("C:/Users/zheng/Desktop/MUSA 508/Chapter6/housingSubsidy.csv")
+root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
+source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
+
+
+housing<-read.csv("/Users/inordia/Desktop/UPenn搞起来/592/Assignment4/MUSA508_Assignment4/housingSubsidy.csv")
 
 #Develop and interpret data visualizations that describe feature importance/correlation.
 housing%>%
@@ -118,9 +122,37 @@ housing.eng<-housing%>%
       month == "dec" ~ "Winter")
   )
 
+housing.eng <- 
+  housing.eng %>%
+  mutate(campaign.cat = case_when(
+    campaign >= 0 & campaign < 2  ~ "Once",
+    campaign >= 2 & campaign < 10  ~ "2 to 9 times",
+    campaign > 9                    ~ "More than 9 times"))
+
+housing.eng <- 
+  housing.eng %>%
+  mutate(education.cat = case_when(
+    education == "basic.4y" | education == "basic.6y" | education == "basic.9y" ~ "Basic",
+    education == "high.school" ~ "HighSchool",
+    education == "professional.course" ~ "Professional",
+    education == "university.degree" ~ "University",
+    education == "illiterate" ~ "Illiterate",
+    education == "unknown" ~ "Unknown"))
+
+housing.eng <-
+  housing.eng %>%
+  mutate(education.bi = ifelse(education.cat == "Basic"|education.cat =="Illiterate", "Low", 
+                               "High"))
+
+housing.eng <-
+  housing.eng %>%
+  mutate(job.cat = ifelse(job == "self-employed"|job =="unemloyed", "Self_or_unemployed", 
+                          "Other"))
+
 #Interpret your new features
 housing.eng%>%
-  dplyr::select(y, age.cat, previous.cat, price.cat, conf.cat, inflation.cat, repair.cat,season) %>%
+  dplyr::select(y, age.cat, previous.cat, price.cat, conf.cat, inflation.cat, repair.cat,season, education.cat, education.bi, 
+                campaign.cat, job.cat) %>%
   gather(Variable, value, -y) %>%
   count(Variable, value, y) %>%
   ggplot(aes(value, n, fill = y)) +   
@@ -163,20 +195,21 @@ kitchenTest<-housingTest%>%
                 day_of_week, campaign, pdays, poutcome)
 
 #engineering
+
 engTrain<-housingTrain%>%
   dplyr::select(
     y,y_numeric,age.cat, previous.cat, price.cat, conf.cat, inflation.cat, 
-    job, marital, education,taxLien,
+    job.cat, marital, education.bi,taxLien,
     mortgage, taxbill_in_phl, contact, 
-    day_of_week, campaign, pdays, season, poutcome
+    day_of_week, campaign.cat, pdays, season, poutcome
   )
 
 engTest<-housingTest%>%
   dplyr::select(
     y,y_numeric,age.cat, previous.cat, price.cat, conf.cat, inflation.cat, 
-    job, marital, education,taxLien,
+    job.cat, marital, education.bi,taxLien,
     mortgage, taxbill_in_phl, contact, 
-    day_of_week, campaign, pdays, season, poutcome
+    day_of_week, campaign.cat, pdays, season, poutcome
   )
 
 #kitchen sink regression
